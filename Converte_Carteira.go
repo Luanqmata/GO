@@ -1,3 +1,4 @@
+//conversor ainda está com erros
 package main
 
 import (
