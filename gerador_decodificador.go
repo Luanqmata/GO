@@ -1,4 +1,3 @@
-//16 bits
 package main
 
 import (
@@ -20,17 +19,24 @@ const (
 	characters = "0123456789abcdef"
 )
 
+var chaves_desejadas = map[string]bool{
+	"1BDyrQ6WoF8VN3g9SAS1iKZcPzFfnDVieY": true,  //16BITS
+	"1QCbW9HWnwQWiQqVo5exhAnmfqKRrCRsvW": true,
+	"1ErZWg5cFCe4Vw5BzgfzB74VNLaXEiEkhk": true,
+	"1Pie8JkxBT6MGPz9Nvi3fsPkr2D8q3GBc1": true,
+}
+
 func geradorChaves() string {
 	rand.Seed(time.Now().UnixNano())
-
-	var caracteresUnicos []byte
-	for i := 0; i < 4; i++ {
-		randomIndex := rand.Intn(len(characters))
-		caracteresUnicos = append(caracteresUnicos, characters[randomIndex])
+	for {
+		var caracteresUnicos []byte
+		for i := 0; i < 4; i++ {
+			randomIndex := rand.Intn(len(characters))
+			caracteresUnicos = append(caracteresUnicos, characters[randomIndex])
+		}
+		chaveGerada := prefix + string(caracteresUnicos)
+		return chaveGerada
 	}
-
-	chaveGerada := prefix + string(caracteresUnicos)
-	return chaveGerada
 }
 
 func generateWif(privKeyHex string) string {
@@ -53,7 +59,6 @@ func generateWif(privKeyHex string) string {
 	return wif
 }
 
-// Função para criar o hash público a partir de uma chave privada
 func createPublicHash160(privKeyHex string) []byte {
 	privKeyBytes, err := hex.DecodeString(privKeyHex)
 	if err != nil {
@@ -68,7 +73,6 @@ func createPublicHash160(privKeyHex string) []byte {
 	return pubKeyHash
 }
 
-// Função para calcular o hash RIPEMD160(SHA256(b))
 func hash160(b []byte) []byte {
 	h := sha256.New()
 	h.Write(b)
@@ -79,7 +83,6 @@ func hash160(b []byte) []byte {
 	return r.Sum(nil)
 }
 
-// Função para codificar o hash da chave pública em um endereço Bitcoin
 func encodeAddress(pubKeyHash []byte) string {
 	version := byte(0x00)
 	versionedPayload := append([]byte{version}, pubKeyHash...)
@@ -88,7 +91,6 @@ func encodeAddress(pubKeyHash []byte) string {
 	return base58.Encode(fullPayload)
 }
 
-// Função para calcular SHA256(SHA256(b))
 func doubleSha256(b []byte) []byte {
 	first := sha256.Sum256(b)
 	second := sha256.Sum256(first[:])
@@ -96,21 +98,20 @@ func doubleSha256(b []byte) []byte {
 }
 
 func main() {
-	for i := 0; i < 10; i++ {
-		// Gerar a chave privada
+	for i := 0; i < 200000; i++ {
 		privateKeyHex := geradorChaves()
-		fmt.Println("\n\nChave privada gerada:", privateKeyHex)
-
-		// Gerar o WIF a partir da chave privada
-		wif := generateWif(privateKeyHex)
-		fmt.Println("WIF correspondente à chave privada:", wif)
-
-		// Criar o hash público a partir da chave privada
+		generateWif(privateKeyHex)
 		pubKeyHash := createPublicHash160(privateKeyHex)
-		fmt.Printf("Public Key Hash: %x\n", pubKeyHash)
-
-		// Codificar o hash da chave pública em um endereço Bitcoin
 		address := encodeAddress(pubKeyHash)
-		fmt.Println("Endereço Bitcoin correspondente à chave privada:", address)
+
+		if chaves_desejadas[address] {
+			fmt.Printf("\nEndereço encontrado: %s\n", address)
+			fmt.Printf("Chave privada correspondente: %s\n", privateKeyHex)
+			// Aqui você pode adicionar a lógica para imprimir a carteira correspondente ao hexa, se necessário
+			break
+		} else {
+			fmt.Printf("%s\n", privateKeyHex)
+		}
 	}
+	fmt.Print("200K DE CHAVES")
 }
