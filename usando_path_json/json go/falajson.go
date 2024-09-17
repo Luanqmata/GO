@@ -12,8 +12,9 @@ type Wallets struct {
 }
 
 type Range struct {
-	Min string `json:"min"`
-	Max string `json:"max"`
+	Min    string `json:"min"`
+	Max    string `json:"max"`
+	Status int    `json:"status"` // Novo campo de status
 }
 
 type Ranges struct {
@@ -55,12 +56,24 @@ func main() {
 		log.Fatal("Escolha inválida.")
 	}
 
-	// Encontrar o range correspondente
-	rangeIndex := choice // Adicionar 2 ao índice da carteira (1 base)
-	if rangeIndex > len(ranges.Ranges) {
-		log.Fatal("Índice de range fora dos limites.")
+	// Encontrar o range e a carteira correspondentes
+	walletIndex := choice - 1 // Índice da carteira (1-based, então ajusta para 0-based)
+	if walletIndex >= len(ranges.Ranges) {
+		log.Fatal("Índice fora dos limites.")
 	}
 
-	selectedRange := ranges.Ranges[rangeIndex-1]
+	// Imprimir a carteira
+	selectedWallet := wallets.Wallets[walletIndex]
+	fmt.Printf("Carteira: %s\n", selectedWallet)
+
+	// Imprimir o range correspondente
+	selectedRange := ranges.Ranges[walletIndex]
 	fmt.Printf("Range correspondente: Min = %s, Max = %s\n", selectedRange.Min, selectedRange.Max)
+
+	// Verificar e imprimir o status
+	if selectedRange.Status == 1 {
+		fmt.Println("Status: Encontrada")
+	} else {
+		fmt.Println("Status: Não encontrada")
+	}
 }
